@@ -37,7 +37,6 @@ class ChatLogActivity : AppCompatActivity() {
 
         supportActionBar?.title = toUser?.username
 
-        //setupDummyData()
         listenForMessages()
 
         send_button_chat_log.setOnClickListener {
@@ -81,6 +80,8 @@ class ChatLogActivity : AppCompatActivity() {
 
                 }
 
+                recyclerview_chat_log.scrollToPosition(adapter.itemCount - 1)
+
             }
         })
     }
@@ -106,11 +107,17 @@ class ChatLogActivity : AppCompatActivity() {
 
         toReference.setValue(chatMessage)
 
+        val latestMessageRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId")
+        latestMessageRef.setValue(chatMessage)
+
+        val latestMessageToRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
+        latestMessageToRef.setValue(chatMessage)
+
     }
 
 }
 
-class ChatFromItem(val text: String, val user: User) : Item<ViewHolder>() {
+class ChatFromItem(val text: String, private val user: User) : Item<ViewHolder>() {
     override fun bind(viewHolder: ViewHolder, position: Int) {
         viewHolder.itemView.textview_from_to.text = text
         val uri = user.profileImageUrl
@@ -123,7 +130,7 @@ class ChatFromItem(val text: String, val user: User) : Item<ViewHolder>() {
     }
 }
 
-class ChatToItem(val text: String, val user: User) : Item<ViewHolder>() {
+class ChatToItem(val text: String, private val user: User) : Item<ViewHolder>() {
     override fun bind(viewHolder: ViewHolder, position: Int) {
         viewHolder.itemView.textview_to_from.text = text
         val uri = user.profileImageUrl
